@@ -10,20 +10,17 @@ key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNr
 supabase: Client = create_client(url, key)
 fake = Faker("pt_BR")
 
-# ============================
-# 1. Limpeza das Tabelas
-# ============================
-# Para evitar violação de constraints, a ordem é importante:
-# Deletar dependentes primeiro (associações e históricos), depois entidades principais
+# =====================================================
+# 1. Limpeza das Tabelas (ordem de deleção)
+# =====================================================
 supabase.table("disciplina_aluno").delete().neq("id_disciplina", -1).execute()
 supabase.table("disciplina_professor").delete().neq("id_disciplina", -1).execute()
 supabase.table("disciplina_historicoescolar").delete().neq("id_historicoescolar", -1).execute()
 supabase.table("historicodisciplina_professor").delete().neq("id_professor", -1).execute()
+supabase.table("disciplinas_lecionadasprofessor").delete().neq("id_disciplina", -1).execute()  # Se ainda existir
 supabase.table("departamento_professor").delete().neq("id_professor", -1).execute()
-supabase.table("disciplina_aluno").delete().neq("id_disciplina", -1).execute()
-supabase.table("disciplina_professor").delete().neq("id_professor", -1).execute()
 supabase.table("disciplina_curso").delete().neq("id_curso", -1).execute()
-supabase.table("historico_escolar").delete().neq("id_historicoescolar", -1).execute()  # <-- Adiciona isso antes de aluno
+supabase.table("historico_escolar").delete().neq("id_historicoescolar", -1).execute()
 supabase.table("disciplinas").delete().neq("id_disciplina", -1).execute()
 supabase.table("professores").delete().neq("id_professor", -1).execute()
 supabase.table("aluno").delete().neq("matricula_aluno", "").execute()
@@ -31,13 +28,11 @@ supabase.table("tccs").delete().neq("id_tcc", -1).execute()
 supabase.table("cursos").delete().neq("id_curso", -1).execute()
 supabase.table("departamentos").delete().neq("id_departamento", -1).execute()
 
-
-
 print("🧹 Tabelas limpas com sucesso!\n")
 
-# ============================
-# 2. Inserção dos Departamentos
-# ============================
+# =====================================================
+# 2. Inserção de Departamentos
+# =====================================================
 nomes_departamentos = [
     "Engenharia",
     "Ciências Exatas",
@@ -57,9 +52,9 @@ print("✅ Departamentos inseridos:")
 print(departamentos)
 print("\n")
 
-# ============================
-# 3. Inserção dos Cursos
-# ============================
+# =====================================================
+# 3. Inserção de Cursos
+# =====================================================
 cursos_possiveis = [
     {"nome": "Engenharia Elétrica", "duracao": 5, "id_departamento": 1},
     {"nome": "Engenharia Mecânica", "duracao": 5, "id_departamento": 1},
@@ -74,7 +69,6 @@ cursos_possiveis = [
 num_cursos = 5
 cursos_originais = random.sample(cursos_possiveis, num_cursos)
 
-# Converter para o formato desejado: a chave 'nome' vira 'nome_curso'
 cursos_inseridos = []
 for i, c in enumerate(cursos_originais, start=1):
     curso = {
@@ -90,9 +84,9 @@ print("✅ Cursos inseridos:")
 print(cursos_inseridos)
 print("\n")
 
-# ============================
-# 4. Inserção dos TCCs
-# ============================
+# =====================================================
+# 4. Inserção de TCCs
+# =====================================================
 num_tccs = 5
 tccs = []
 for i in range(1, num_tccs + 1):
@@ -104,13 +98,14 @@ for i in range(1, num_tccs + 1):
     }
     tccs.append(tcc)
     supabase.table("tccs").insert(tcc).execute()
+
 print("✅ TCCs inseridos:")
 print(tccs)
 print("\n")
 
-# ============================
-# 5. Inserção dos Alunos
-# ============================
+# =====================================================
+# 5. Inserção de Alunos
+# =====================================================
 num_alunos = 10
 alunos = []
 for i in range(1, num_alunos + 1):
@@ -123,35 +118,43 @@ for i in range(1, num_alunos + 1):
     }
     alunos.append(aluno)
     supabase.table("aluno").insert(aluno).execute()
+
 print("✅ Alunos inseridos:")
 print(alunos)
 print("\n")
 
-# ============================
-# 6. Inserção dos Professores
-# ============================
+# =====================================================
+# 6. Inserção de Professores (AGORA usando TCCs válidos)
+# =====================================================
 num_professores = 5
 professores = []
+
+# Se quiser atribuir 'cargo' (ex: 'Chefe', 'Coordenador', 'Nenhum'), defina:
+cargos_possiveis = ["Chefe", "Coordenador", "Nenhum"]
+
 for i in range(1, num_professores + 1):
     professor = {
         "id_professor": i,
         "nome_professor": fake.name(),
         "email_professor": fake.email(),
-        "id_tcc": random.randint(1, num_tccs)
+        # Agora usando id_tcc válido
+        "id_tcc": random.choice([t["id_tcc"] for t in tccs]),
+        # Se quiser cargo no professor
+        "cargo": random.choice(cargos_possiveis)
     }
     professores.append(professor)
     supabase.table("professores").insert(professor).execute()
+
 print("✅ Professores inseridos:")
 print(professores)
 print("\n")
 
-# ============================
-# 7. Inserção das Disciplinas (dados básicos sem FK direta com cursos)
-# ============================
+# =====================================================
+# 7. Disciplinas (dados básicos)
+# =====================================================
 disciplinas = []
 id_disciplina = 1
 
-# Dicionário realista de disciplinas por curso
 disciplinas_por_curso = {
     "Engenharia Elétrica": [
         "Circuitos Elétricos",
@@ -209,7 +212,6 @@ disciplinas_por_curso = {
     ]
 }
 
-# Para cada curso inserido, se houver disciplinas definidas para ele, inserir as disciplinas básicas
 for curso in cursos_inseridos:
     nome_curso = curso["nome_curso"]
     if nome_curso in disciplinas_por_curso:
@@ -221,7 +223,6 @@ for curso in cursos_inseridos:
                 "nome_disciplina": nome_disciplina,
                 "media_disciplina": media,
                 "situacao_disciplina": situacao
-                # Não inserimos id_curso aqui, pois usaremos a tabela associativa "disciplina_curso"
             }
             supabase.table("disciplinas").insert(disciplina).execute()
             disciplinas.append(disciplina)
@@ -231,16 +232,16 @@ print("✅ Disciplinas inseridas (sem associação direta):")
 print(disciplinas)
 print("\n")
 
-# ============================
-# 8. Inserção das associações na tabela "disciplina_curso"
-# ============================
+# =====================================================
+# 8. Associar disciplinas a cursos (disciplina_curso)
+# =====================================================
 associations_curso = []
 for curso in cursos_inseridos:
     nome_curso = curso["nome_curso"]
     id_curso = curso["id_curso"]
     if nome_curso in disciplinas_por_curso:
         for nome_disciplina in disciplinas_por_curso[nome_curso]:
-            # Procura na lista de disciplinas inseridas para encontrar o id correspondente
+            # Procura disciplina na lista
             for disc in disciplinas:
                 if disc["nome_disciplina"] == nome_disciplina:
                     association = {
@@ -251,40 +252,40 @@ for curso in cursos_inseridos:
                     associations_curso.append(association)
                     break
 
-print("✅ Associações inseridas na tabela 'disciplina_curso':")
+print("✅ Associações na tabela 'disciplina_curso':")
 print(associations_curso)
 print("\n")
 
-# ============================
-# 9. Inserção dos registros na tabela Historico_Escolar
-# ============================
+# =====================================================
+# 9. Inserir registros em Historico_Escolar
+# =====================================================
 historicos = []
 id_historico = 1
 for aluno in alunos:
     media_geral = round(random.uniform(0, 10), 2)
     situacao = "Aprovado" if media_geral >= 5.0 else "Reprovado"
-    historico = {
+    hist = {
         "id_historicoescolar": id_historico,
         "matricula_aluno": aluno["matricula_aluno"],
         "media_escolar": media_geral,
         "situacao_escolar": situacao
     }
-    supabase.table("historico_escolar").insert(historico).execute()
-    historicos.append(historico)
+    supabase.table("historico_escolar").insert(hist).execute()
+    historicos.append(hist)
     id_historico += 1
 
 print("✅ Historicos escolares inseridos:")
 print(historicos)
 print("\n")
 
-# ============================
-# 10. Inserção das associações na tabela "disciplina_historicoescolar"
-# ============================
+# =====================================================
+# 10. Associar disciplinas ao histórico (disciplina_historicoescolar)
+# =====================================================
 associations_disc_hist = []
 for hist in historicos:
-    num_disc = random.randint(1, min(3, len(disciplinas)))
-    disciplinas_selecionadas = random.sample(disciplinas, num_disc)
-    for disc in disciplinas_selecionadas:
+    qtd = random.randint(1, min(3, len(disciplinas)))
+    discs_sel = random.sample(disciplinas, qtd)
+    for disc in discs_sel:
         assoc = {
             "id_historicoescolar": hist["id_historicoescolar"],
             "id_disciplina": disc["id_disciplina"]
@@ -292,37 +293,46 @@ for hist in historicos:
         supabase.table("disciplina_historicoescolar").insert(assoc).execute()
         associations_disc_hist.append(assoc)
 
-print("✅ Associações inseridas em disciplina_historicoescolar:")
+print("✅ Associações em disciplina_historicoescolar:")
 print(associations_disc_hist)
 print("\n")
 
-# ============================
-# 11. Inserção das associações na tabela "departamento_professor"
-# ============================
+# =====================================================
+# 11. Ligação departamento_professor
+# =====================================================
+# em vez de rodar o for _ in range(num_depts):
+# e random.randint(1, 3), faça assim:
+
 associations_dept_prof = []
 for professor in professores:
-    num_depts = random.randint(1, min(2, len(departamentos)))
-    depts_selecionados = random.sample(departamentos, num_depts)
-    for dept in depts_selecionados:
-        association = {
-            "id_professor": professor["id_professor"],
-            "id_departamento": dept["id_departamento"]
-        }
-        supabase.table("departamento_professor").insert(association).execute()
-        associations_dept_prof.append(association)
+    # Lista de IDs possíveis
+    possible_depts = [1, 2, 3]
+    
+    # Escolhe de 1 a 2 departamentos únicos
+    num_depts = random.randint(1, 2)
+    dept_selecionados = random.sample(possible_depts, num_depts)
 
-print("✅ Associações inseridas em departamento_professor:")
+    for dept_id in dept_selecionados:
+        assoc = {
+            "id_professor": professor["id_professor"],
+            "id_departamento": dept_id
+        }
+        supabase.table("departamento_professor").insert(assoc).execute()
+        associations_dept_prof.append(assoc)
+
+print("✅ Associações em departamento_professor:")
 print(associations_dept_prof)
 print("\n")
 
-# ============================
-# 12. Inserção das associações na tabela "historicodisciplina_professor"
-# ============================
+
+# =====================================================
+# 12. Tabela historicodisciplina_professor
+# =====================================================
 associations_hist_disc_prof = []
 for professor in professores:
-    num_assoc = random.randint(1, min(2, len(disciplinas)))
-    disciplinas_selecionadas = random.sample(disciplinas, num_assoc)
-    for disc in disciplinas_selecionadas:
+    qtd = random.randint(1, 2)
+    discs_sel = random.sample(disciplinas, qtd)
+    for disc in discs_sel:
         assoc = {
             "id_professor": professor["id_professor"],
             "id_disciplina": disc["id_disciplina"]
@@ -330,37 +340,45 @@ for professor in professores:
         supabase.table("historicodisciplina_professor").insert(assoc).execute()
         associations_hist_disc_prof.append(assoc)
 
-print("✅ Associações inseridas em historicodisciplina_professor:")
+print("✅ Associações em historicodisciplina_professor:")
 print(associations_hist_disc_prof)
 
-# Inserir associações na tabela disciplina_aluno
+# =====================================================
+# Associação disciplina_aluno
+# =====================================================
 associations_aluno = []
 for aluno in alunos:
-    num_assoc = random.randint(1, min(3, len(disciplinas)))
-    disciplinas_selecionadas = random.sample(disciplinas, num_assoc)
-    for disc in disciplinas_selecionadas:
-        association = {
+    qtd = random.randint(1, min(3, len(disciplinas)))
+    discs_sel = random.sample(disciplinas, qtd)
+    for disc in discs_sel:
+        assoc = {
             "matricula_aluno": aluno["matricula_aluno"],
             "id_disciplina": disc["id_disciplina"]
         }
-        supabase.table("disciplina_aluno").insert(association).execute()
-        associations_aluno.append(association)
-print("✅ Associações em disciplina_aluno inseridas:")
+        supabase.table("disciplina_aluno").insert(assoc).execute()
+        associations_aluno.append(assoc)
+
+print("✅ Associações em disciplina_aluno:")
 print(associations_aluno)
 print("\n")
 
-# Inserir associações na tabela disciplina_professor
+# =====================================================
+# Associação disciplina_professor
+# =====================================================
 associations_prof = []
 for professor in professores:
-    num_assoc = random.randint(1, min(3, len(disciplinas)))
-    disciplinas_selecionadas = random.sample(disciplinas, num_assoc)
-    for disc in disciplinas_selecionadas:
-        association = {
+    qtd = random.randint(1, min(3, len(disciplinas)))
+    discs_sel = random.sample(disciplinas, qtd)
+    for disc in discs_sel:
+        assoc = {
             "id_professor": professor["id_professor"],
             "id_disciplina": disc["id_disciplina"]
         }
-        supabase.table("disciplina_professor").insert(association).execute()
-        associations_prof.append(association)
-print("✅ Associações em disciplina_professor inseridas:")
+        supabase.table("disciplina_professor").insert(assoc).execute()
+        associations_prof.append(assoc)
+
+print("✅ Associações em disciplina_professor:")
 print(associations_prof)
 print("\n")
+
+print("✅ Script concluído com sucesso!")
