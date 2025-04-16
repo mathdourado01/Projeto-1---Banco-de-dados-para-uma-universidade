@@ -1,0 +1,110 @@
+CREATE TABLE departamentos (
+    id_departamento INT PRIMARY KEY,
+    nome_departamento VARCHAR
+);
+
+CREATE TABLE cursos (
+    id_curso INT PRIMARY KEY,
+    nome_curso VARCHAR,
+    duracao_curso INT,
+    id_departamento INT,
+    FOREIGN KEY (id_departamento) REFERENCES departamentos(id_departamento)
+);
+
+CREATE TABLE tccs (
+    id_tcc INT PRIMARY KEY,
+    titulo_tcc VARCHAR,
+    nota_tcc NUMERIC,
+    id_curso INT,
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+);
+
+CREATE TABLE professores (
+    id_professor INT PRIMARY KEY,
+    nome_professor VARCHAR,
+    email_professor VARCHAR,
+    id_tcc INT,
+    cargo VARCHAR,
+    FOREIGN KEY (id_tcc) REFERENCES tccs(id_tcc)
+);
+
+CREATE TABLE aluno (
+    matricula_aluno BPCHAR PRIMARY KEY,
+    nome_aluno VARCHAR,
+    email_aluno VARCHAR,
+    id_tcc INT,
+    id_curso INT,
+    FOREIGN KEY (id_tcc) REFERENCES tccs(id_tcc),
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+);
+CREATE TABLE departamento_professor (
+    id_professor INT,
+    id_departamento INT,
+    PRIMARY KEY (id_professor, id_departamento),
+    FOREIGN KEY (id_professor) REFERENCES professores(id_professor),
+    FOREIGN KEY (id_departamento) REFERENCES departamentos(id_departamento)
+);
+
+CREATE TABLE disciplina_curso (
+    id_disciplina INT,
+    id_curso INT,
+    PRIMARY KEY (id_disciplina, id_curso),
+    FOREIGN KEY (id_disciplina) REFERENCES disciplinas(id_disciplina),
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+);
+
+CREATE TABLE disciplina_professor (
+    id_professor INT,
+    id_disciplina INT,
+    PRIMARY KEY (id_professor, id_disciplina),
+    FOREIGN KEY (id_professor) REFERENCES professores(id_professor),
+    FOREIGN KEY (id_disciplina) REFERENCES disciplinas(id_disciplina)
+);
+
+CREATE TABLE disciplina_aluno (
+    matricula_aluno BPCHAR,
+    id_disciplina INT,
+    PRIMARY KEY (matricula_aluno, id_disciplina),
+    FOREIGN KEY (matricula_aluno) REFERENCES aluno(matricula_aluno),
+    FOREIGN KEY (id_disciplina) REFERENCES disciplinas(id_disciplina)
+);
+CREATE TABLE historico_escolar (
+    id_historicoescolar INT PRIMARY KEY,
+    media_escolar NUMERIC,
+    situacao_escolar VARCHAR,
+    matricula_aluno BPCHAR,
+    semestre_historico INT,
+    FOREIGN KEY (matricula_aluno) REFERENCES aluno(matricula_aluno)
+);
+
+CREATE TABLE disciplina_historicoescolar (
+    id_historicoescolar INT,
+    id_disciplina INT,
+    semestre VARCHAR,
+    PRIMARY KEY (id_historicoescolar, id_disciplina),
+    FOREIGN KEY (id_historicoescolar) REFERENCES historico_escolar(id_historicoescolar),
+    FOREIGN KEY (id_disciplina) REFERENCES disciplinas(id_disciplina)
+);
+CREATE TABLE disciplinas (
+    id_disciplina INT PRIMARY KEY,
+    nome_disciplina VARCHAR,
+    media_disciplina NUMERIC,
+    semestre_disciplina VARCHAR,
+    sigla_disciplina VARCHAR
+);
+CREATE TABLE disciplinas_lecionadasprofessor (
+    id_disciplinalecionadas INT PRIMARY KEY,
+    nome_disciplinalecionadas VARCHAR,
+    media_disciplinalecionadas NUMERIC,
+    situacao_disciplinalecionadas VARCHAR,
+    id_disciplina INT,
+    FOREIGN KEY (id_disciplina) REFERENCES disciplinas(id_disciplina)
+);
+
+CREATE TABLE historicodisciplina_professor (
+    id_professor INT,
+    id_disciplinalecionadas INT,
+    PRIMARY KEY (id_professor, id_disciplinalecionadas),
+    FOREIGN KEY (id_professor) REFERENCES professores(id_professor),
+    FOREIGN KEY (id_disciplinalecionadas) REFERENCES disciplinas_lecionadasprofessor(id_disciplinalecionadas)
+);
