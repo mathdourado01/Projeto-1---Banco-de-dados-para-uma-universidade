@@ -77,7 +77,6 @@ for c in cursos:
     print(c)
 print("")
 
-# Mapeamento: id_curso → nome (para uso posterior)
 curso_id_para_nome = {c["id_curso"]: c["nome_curso"] for c in cursos}
 
 # =====================================================
@@ -102,24 +101,19 @@ print("")
 
 # =====================================================
 # 5. Inserção de Alunos (100 alunos)
-# Distribuição: os 60 primeiros alunos serão atribuídos ao curso "Ciência da Computação" (id 7)
-# e os demais serão distribuídos entre os outros cursos.
+# =====================================================
 alunos = []
 numero_alunos = 100
 matriculas = [f"2024{i:04}" for i in range(1, numero_alunos + 1)]
 tcc_ids = [tc["id_tcc"] for tc in tccs]
 curso_ids = [c["id_curso"] for c in cursos]
-# Lista de cursos disponíveis, exceto o curso 7 (Ciência da Computação)
 outros_cursos = [cid for cid in curso_ids if cid != 7]
 
 for i, mat in enumerate(matriculas, start=1):
     if i <= 60:
-        # Os 60 primeiros alunos vão para "Ciência da Computação" (id 7)
         id_curso_escolhido = 7
     else:
-        # Os demais distribuídos entre os outros cursos em round-robin
         id_curso_escolhido = outros_cursos[(i - 61) % len(outros_cursos)]
-    # Para TCC, também usamos round-robin entre todos os TCCs
     id_tcc_escolhido = tcc_ids[(i - 1) % len(tcc_ids)]
     aluno = {
         "matricula_aluno": mat,
@@ -137,11 +131,10 @@ print("")
 
 # =====================================================
 # 6. Inserção de Professores (20 professores)
-# Garantir: cada departamento tem 1 Chefe e cada curso tem 1 Coordenador.
+# =====================================================
 professores = []
 next_prof_id = 1
 
-# Professores Chefe: 1 para cada departamento (3 no total)
 for dept in departamentos:
     prof = {
         "id_professor": next_prof_id,
@@ -154,7 +147,6 @@ for dept in departamentos:
     supabase.table("professores").insert(prof).execute()
     next_prof_id += 1
 
-# Professores Coordenador: 1 para cada curso (9 no total)
 for curso in cursos:
     prof = {
         "id_professor": next_prof_id,
@@ -167,7 +159,6 @@ for curso in cursos:
     supabase.table("professores").insert(prof).execute()
     next_prof_id += 1
 
-# Professores adicionais (cargo "Nenhum") para completar 20
 while next_prof_id <= 20:
     prof = {
         "id_professor": next_prof_id,
@@ -186,72 +177,91 @@ for p in professores:
 print("")
 
 # =====================================================
-# 7. Inserção de Disciplinas (10 por curso)
-# Cada curso terá 10 disciplinas com nomes fixos.
+# 7. Inserção de Disciplinas (10 por curso) + Q46
+# =====================================================
 disciplinas_por_curso = {
     "Engenharia Elétrica": [
-        "Circuitos Elétricos","Eletromagnetismo","Sistemas de Controle","Eletrônica Analógica","Máquinas Elétricas",
-        "Potência e Máquinas","Eletrônica de Potência","Conversão de Energia","Telemetria Elétrica","Instrumentação Elétrica"
+        "Circuitos Elétricos","Eletromagnetismo","Sistemas de Controle","Eletrônica Analógica",
+        "Máquinas Elétricas","Potência e Máquinas","Eletrônica de Potência","Conversão de Energia",
+        "Telemetria Elétrica","Instrumentação Elétrica"
     ],
     "Engenharia Mecânica": [
-        "Mecânica dos Sólidos","Termodinâmica","Dinâmica","Resistência dos Materiais","Materiais de Engenharia",
-        "Mecânica dos Fluidos","Controle de Processos Mecânicos","Projeto Mecânico","Fabricação Mecânica","Desenho Técnico"
+        "Mecânica dos Sólidos","Termodinâmica","Dinâmica","Resistência dos Materiais",
+        "Materiais de Engenharia","Mecânica dos Fluidos","Controle de Processos Mecânicos",
+        "Projeto Mecânico","Fabricação Mecânica","Desenho Técnico"
     ],
     "Engenharia de Produção": [
-        "Logística","Gestão da Qualidade","Planejamento da Produção","Pesquisa Operacional","Engenharia de Métodos",
-        "Estatística Aplicada","Simulação de Processos","Gerenciamento de Projetos","Gestão de Custos","Inovação e Empreendedorismo"
+        "Logística","Gestão da Qualidade","Planejamento da Produção","Pesquisa Operacional",
+        "Engenharia de Métodos","Estatística Aplicada","Simulação de Processos",
+        "Gerenciamento de Projetos","Gestão de Custos","Inovação e Empreendedorismo"
     ],
     "Engenharia Civil": [
         "Estruturas de Concreto","Geotecnia","Hidráulica","Construção Civil","Pavimentação",
         "Mecânica dos Solos","Saneamento Ambiental","Projeto Estrutural","Resistência dos Materiais","Topografia"
     ],
     "Engenharia de Automação e Controle": [
-        "Controle de Processos","Instrumentação","Automação Industrial","Redes Industriais","Sistemas de Supervisão",
-        "Robótica Industrial","Sinais e Sistemas","Eletrônica Digital","Modelagem e Simulação","Integração de Sistemas"
+        "Controle de Processos","Instrumentação","Automação Industrial","Redes Industriais",
+        "Sistemas de Supervisão","Robótica Industrial","Sinais e Sistemas","Eletrônica Digital",
+        "Modelagem e Simulação","Integração de Sistemas"
     ],
     "Engenharia Química": [
-        "Operações Unitárias","Fenômenos de Transporte","Reatores Químicos","Química Orgânica","Processos Químicos",
-        "Termodinâmica Química","Equilíbrio Químico","Processos de Separação","Controle de Processos","Tecnologia dos Polímeros"
+        "Operações Unitárias","Fenômenos de Transporte","Reatores Químicos","Química Orgânica",
+        "Processos Químicos","Termodinâmica Química","Equilíbrio Químico","Processos de Separação",
+        "Controle de Processos","Tecnologia dos Polímeros"
     ],
     "Ciência da Computação": [
-        "Algoritmos e Estruturas de Dados","Sistemas Operacionais","Compiladores","Inteligência Artificial","Programação",
-        "Banco de Dados","Redes de Computadores","Arquitetura de Computadores","Engenharia de Software","Computação Gráfica"
+        "Algoritmos e Estruturas de Dados","Sistemas Operacionais","Compiladores","Inteligência Artificial",
+        "Programação","Banco de Dados","Redes de Computadores","Arquitetura de Computadores",
+        "Engenharia de Software","Computação Gráfica"
     ],
     "Ciência de Dados e IA": [
-        "Aprendizado de Máquina","Estatística para Dados","Processamento de Linguagem Natural","Deep Learning","Programação",
-        "Mineração de Dados","Visualização de Dados","Big Data","Inteligência Computacional","Modelos Preditivos"
+        "Aprendizado de Máquina","Estatística para Dados","Processamento de Linguagem Natural","Deep Learning",
+        "Programação","Mineração de Dados","Visualização de Dados","Big Data",
+        "Inteligência Computacional","Modelos Preditivos"
     ],
     "Administração": [
         "Marketing","Contabilidade","Gestão Financeira","Gestão de Pessoas","Economia Empresarial",
-        "Estratégia e Planejamento","Comportamento Organizacional","Gestão de Operações","Recursos Humanos","Gestão de Projetos"
+        "Estratégia e Planejamento","Comportamento Organizacional","Gestão de Operações",
+        "Recursos Humanos","Gestão de Projetos"
     ]
 }
 
-disciplinas_global = {}  # mapeia: nome_disciplina → registro
+disciplinas_global = {}
 id_disciplina = 1
 for curso_nome, lista_disc in disciplinas_por_curso.items():
     for idx, disc_nome in enumerate(lista_disc, start=1):
         if disc_nome in disciplinas_global:
-            disciplinas_global[disc_nome]["semestre_disciplina"] = min(disciplinas_global[disc_nome]["semestre_disciplina"], idx)
+            disciplinas_global[disc_nome]["semestre_disciplina"] = min(
+                disciplinas_global[disc_nome]["semestre_disciplina"], idx
+            )
         else:
             novo = {
                 "id_disciplina": id_disciplina,
                 "nome_disciplina": disc_nome,
                 "media_disciplina": 5.00,
                 "semestre_disciplina": idx,
-                "sigla_disciplina": "".join(word[0] for word in disc_nome.split()).upper() + str(idx)
+                "sigla_disciplina": "".join(w[0] for w in disc_nome.split()).upper() + str(idx)
             }
             disciplinas_global[disc_nome] = novo
             supabase.table("disciplinas").insert(novo).execute()
             id_disciplina += 1
+
+# Ajuste para Query 46: forçar as duas disciplinas no 7º semestre
+for nome in ["Engenharia de Software", "Redes de Computadores"]:
+    disciplinas_global[nome]["semestre_disciplina"] = 7
+    supabase.table("disciplinas") \
+        .update({"semestre_disciplina": 7}) \
+        .eq("nome_disciplina", nome) \
+        .execute()
+
 disciplinas = list(disciplinas_global.values())
-print("✅ Disciplinas inseridas (com sigla):")
+print("✅ Disciplinas inseridas (com sigla e ajuste Q46):")
 for d in disciplinas:
     print(f"{d['nome_disciplina']} -> Sigla: {d['sigla_disciplina']} (Semestre {d['semestre_disciplina']})")
 print("")
 
 # =====================================================
-# 8. Associação Disciplina-Curso (tabela disciplina_curso)
+# 8. Associação Disciplina-Curso
 # =====================================================
 associations_curso = []
 curso_nome_para_id = {c["nome_curso"]: c["id_curso"] for c in cursos}
@@ -264,13 +274,13 @@ for curso_nome, lista_disc in disciplinas_por_curso.items():
         }
         supabase.table("disciplina_curso").insert(assoc).execute()
         associations_curso.append(assoc)
-print("✅ Associações na tabela 'disciplina_curso':")
+print("✅ Associações em disciplina_curso")
 print(associations_curso)
 print("")
 
 # =====================================================
 # 9. Histórico Escolar (com notas aleatórias)
-# Cada curso tem duração (em anos); cada ano tem 2 semestres.
+
 historicos = []
 hist_id = 1
 curso_duracao_semestres = {c["id_curso"]: c["duracao_curso"] * 2 for c in cursos}
