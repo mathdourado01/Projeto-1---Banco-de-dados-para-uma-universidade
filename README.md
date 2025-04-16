@@ -20,6 +20,7 @@ Para rodar o projeto e gerar os dados no seu banco de dados do Supabase, siga os
 - Certifique-se de ter o Python instalado em sua máquina, e utilize alguma plataforma para rodar o código (Visual Studio Code, Replit, etc.).
 - Acesse o SupaBase como Banco de Dados para armazenar as informações geradas pelo código.
 - Copie a URL do seu projeto Supabase e a chave pública (public key), pois você precisará inserir essas informações no código.
+- No banco de dados, crie as tabelas a partir da querie de criação presente no repositório na pasta "QueriesTables".
 - Após colocar as informações do seu banco no código, execute-o.
 
 O script fará o seguinte automaticamente:
@@ -29,8 +30,14 @@ O script fará o seguinte automaticamente:
 - Fará todas as relações necessárias, conforme os requisitos e as queries.
 - Exibirá no terminal um log indicando o progresso e a confirmação da execução.
 
-## Modelo Relacional
+Após isso:
+- O banco será capaz de executar no SQL Editor 15 queries relacionadas ao projeto presentes no repositório pasta "Queries".
 
+## Modelo Entidade Relacional
+![Modelo Entidade Relacional](imagens/MR.png)
+
+## Modelo Relacional
+![Modelo Relacional](imagens/MER.png)
 
 
   
