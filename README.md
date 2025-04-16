@@ -2,6 +2,7 @@
 ## 📌 Integrantes
 
 Nome: João Pedro Sabino Garcia - RA: 22.224.032-7
+
 Nome: Matheus Dourado Valle - RA: 22.224.023-6 
 
 ## 📖 Descrição do Projeto
