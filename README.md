@@ -34,7 +34,7 @@ Após isso:
 - O banco será capaz de executar no SQL Editor 15 queries relacionadas ao projeto presentes no repositório pasta "Queries".
 
 ## Modelo Entidade Relacional
-![Modelo Entidade Relacional](imagens/MR.png)
+![Modelo Entidade Relacional](imagens/MER2.png)
 
 ## Modelo Relacional
 ![Modelo Relacional](imagens/MER.png)
