@@ -1,0 +1,176 @@
+--Q1
+
+SELECT 
+  hs1.matricula_aluno,
+  d.nome_disciplina,
+  hs1.semestre_historico AS semestre_reprovado,
+  hs2.semestre_historico AS semestre_aprovado,
+  hs1.media_escolar AS media_reprovacao,
+  hs2.media_escolar AS media_aprovacao,
+  hs1.situacao_escolar AS situacao_reprovacao,
+  hs2.situacao_escolar AS situacao_aprovacao
+FROM historico_escolar hs1
+JOIN historico_escolar hs2 
+  ON hs1.matricula_aluno = hs2.matricula_aluno 
+     AND hs2.semestre_historico = hs1.semestre_historico + 1
+JOIN disciplina_historicoescolar dh 
+  ON hs1.id_historicoescolar = dh.id_historicoescolar
+JOIN disciplinas d 
+  ON d.id_disciplina = dh.id_disciplina
+WHERE hs1.matricula_aluno = '20240001'
+  AND hs1.situacao_escolar = 'Reprovado'
+  AND hs2.situacao_escolar = 'Aprovado';
+
+--Q2
+
+SELECT 
+  p.nome_professor AS orientador, 
+  t.titulo_tcc, 
+  a.nome_aluno
+FROM tccs t
+JOIN professores p ON p.id_tcc = t.id_tcc
+JOIN aluno a ON a.id_tcc = t.id_tcc;
+
+--Q3
+
+-- Query A
+SELECT 
+  c.nome_curso, 
+  d.sigla_disciplina, 
+  d.nome_disciplina, 
+  d.semestre_disciplina
+FROM cursos c
+JOIN disciplina_curso dc ON c.id_curso = dc.id_curso
+JOIN disciplinas d ON d.id_disciplina = dc.id_disciplina
+WHERE c.nome_curso = 'Ciência da Computação';
+
+-- Query B
+SELECT 
+  c.nome_curso, 
+  d.sigla_disciplina, 
+  d.nome_disciplina, 
+  d.semestre_disciplina
+FROM cursos c
+JOIN disciplina_curso dc ON c.id_curso = dc.id_curso
+JOIN disciplinas d ON d.id_disciplina = dc.id_disciplina
+WHERE c.nome_curso = 'Ciência de Dados e IA';
+
+--Q4
+
+SELECT 
+  d.sigla_disciplina,
+  d.nome_disciplina,
+  p.nome_professor
+FROM disciplina_aluno da
+JOIN disciplinas d ON da.id_disciplina = d.id_disciplina
+JOIN disciplina_professor dp ON dp.id_disciplina = d.id_disciplina
+JOIN professores p ON p.id_professor = dp.id_professor
+WHERE da.matricula_aluno = '20240001';
+
+--Q5
+
+SELECT 
+  p.nome_professor,
+  COALESCE(d.nome_departamento, 'nenhum') AS nome_departamento,
+  COALESCE(c.nome_curso, 'nenhum') AS nome_curso
+FROM professores p
+LEFT JOIN departamento_professor dp ON p.id_professor = dp.id_professor AND p.cargo = 'Chefe'
+LEFT JOIN departamentos d ON dp.id_departamento = d.id_departamento
+LEFT JOIN cursos c ON p.id_tcc = c.id_curso AND p.cargo = 'Coordenador'
+WHERE p.cargo IN ('Chefe', 'Coordenador');
+
+-- 1. Encontre os nomes de todos os estudantes.
+SELECT nome_aluno FROM aluno;
+-- 2. Liste os IDs e nomes de todos os professores.
+SELECT id_professor, nome_professor FROM professores;
+-- 10. Recupere os nomes e IDs dos estudantes que são orientados por um professor específico (ID = '1').
+SELECT a.matricula_aluno, a.nome_aluno
+FROM aluno a
+JOIN tccs t ON a.id_tcc = t.id_tcc
+JOIN professores p ON p.id_tcc = t.id_tcc
+WHERE p.id_professor = 1;
+-- 13. Liste os cursos que foram ministrados pelos professores '1' e '2'
+SELECT DISTINCT c.id_curso, c.nome_curso
+FROM cursos c
+JOIN disciplina_curso dc ON c.id_curso = dc.id_curso
+JOIN disciplina_professor dp ON dp.id_disciplina = dc.id_disciplina
+WHERE dp.id_professor IN (1, 2);
+-- 14. Encontre os estudantes que cursaram "Ciência da Computação" ou "Engenharia Elétrica"
+SELECT a.nome_aluno, c.nome_curso
+FROM aluno a
+JOIN cursos c ON a.id_curso = c.id_curso
+WHERE c.nome_curso IN ('Ciência da Computação', 'Engenharia Elétrica');
+-- 22. Encontre os estudantes que estão matriculados em cursos oferecidos pelo departamento de "Ciência da Computação"(nosso Caso "Ciencia Exatas").
+SELECT 
+  a.nome_aluno, 
+  c.nome_curso, 
+  d.nome_departamento
+FROM aluno a
+JOIN cursos c ON a.id_curso = c.id_curso
+JOIN departamentos d ON c.id_departamento = d.id_departamento
+WHERE d.nome_departamento = 'Ciências Exatas';
+-- 24. Liste os professores que ministraram cursos com mais de 50 alunos matriculados.
+SELECT 
+  p.id_professor,
+  p.nome_professor,
+  COUNT(DISTINCT a.matricula_aluno) AS total_alunos_distintos
+FROM professores p
+JOIN disciplina_professor dp ON p.id_professor = dp.id_professor
+JOIN disciplina_curso dc        ON dp.id_disciplina = dc.id_disciplina
+JOIN aluno a                    ON dc.id_curso       = a.id_curso
+GROUP BY p.id_professor, p.nome_professor
+HAVING COUNT(DISTINCT a.matricula_aluno) > 50;
+-- 34. Liste os cursos que foram ministrados por mais de um professor em semestres diferentes
+SELECT 
+  c.id_curso,
+  c.nome_curso,
+  COUNT(DISTINCT dp.id_professor)      AS num_professores,
+  COUNT(DISTINCT d.semestre_disciplina) AS semestres_distintos
+FROM cursos c
+JOIN disciplina_curso dc ON c.id_curso      = dc.id_curso
+JOIN disciplinas d      ON d.id_disciplina  = dc.id_disciplina
+JOIN disciplina_professor dp 
+                        ON dp.id_disciplina = d.id_disciplina
+GROUP BY c.id_curso, c.nome_curso
+HAVING COUNT(DISTINCT dp.id_professor) > 1
+   AND COUNT(DISTINCT d.semestre_disciplina) > 1;
+-- 42. Encontre o número de alunos matriculados em cada curso e liste-os por título de curso
+SELECT 
+  c.nome_curso, 
+  COUNT(a.matricula_aluno) AS total_alunos
+FROM cursos c
+LEFT JOIN aluno a ON c.id_curso = a.id_curso
+GROUP BY c.nome_curso
+ORDER BY c.nome_curso;
+-- 46) Encontre os estudantes que cursaram "Engenharia de Software" e "Redes de Computadores" no mesmo semestre
+SELECT
+  a.matricula_aluno,
+  a.nome_aluno,
+  d1.nome_disciplina AS engenharia_de_software,
+  d2.nome_disciplina AS redes_de_computadores,
+  dh1.semestre
+FROM aluno a
+JOIN historico_escolar hs
+  ON a.matricula_aluno = hs.matricula_aluno
+JOIN disciplina_historicoescolar dh1
+  ON hs.id_historicoescolar = dh1.id_historicoescolar
+JOIN disciplinas d1
+  ON dh1.id_disciplina = d1.id_disciplina
+JOIN disciplina_historicoescolar dh2
+  ON hs.id_historicoescolar = dh2.id_historicoescolar
+     AND dh2.semestre = dh1.semestre
+JOIN disciplinas d2
+  ON dh2.id_disciplina = d2.id_disciplina
+WHERE d1.nome_disciplina = 'Engenharia de Software'
+  AND d2.nome_disciplina = 'Redes de Computadores'
+ORDER BY a.matricula_aluno;
+
+
+
+
+
+
+
+
+
+
