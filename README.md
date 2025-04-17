@@ -47,7 +47,7 @@ Após isso:
 ![Modelo Entidade Relacional](imagens/fotoMER.png)
 
 ## Modelo Relacional
-![Modelo Relacional](imagens/fotoMR.png)
+![Modelo Relacional](imagens/MRcorreto.png)
 
 
   
