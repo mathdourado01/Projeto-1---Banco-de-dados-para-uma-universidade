@@ -6,14 +6,23 @@ Nome: João Pedro Sabino Garcia - RA: 22.224.032-7
 Nome: Matheus Dourado Valle - RA: 22.224.023-6 
 
 ## 📖 Descrição do Projeto
+Este projeto visa implementar um sistema de gerenciamento acadêmico universitário através de um banco de dados estruturado. Ele permite armazenar, gerenciar e consultar informações relacionadas a:
 
-Este projeto consiste em um sistema de gestão acadêmica universitária, implementado para armazenar e gerenciar informações sobre alunos, professores, cursos, disciplinas, departamentos e históricos acadêmicos.
-As principais funcionalidades incluem:
-- Cadastro e gestão de alunos e professores
-- Gerenciamento de disciplinas associadas a cursos específicos.
-- Controle acadêmico através de históricos escolares.
-- Associação de professores às disciplinas ministradas.
-- Consultas avançadas através de queries específicas em SQL.
+Alunos: informações pessoais, matrícula, curso matriculado e TCC relacionado.
+
+Professores: dados pessoais, disciplinas ministradas, departamento associado e cargo (Chefe, Coordenador ou Nenhum).
+
+Cursos: dados gerais dos cursos, duração e departamento ao qual pertencem.
+
+Disciplinas: disciplinas específicas para cada curso, informações como média exigida e semestre em que são ofertadas.
+
+Departamentos: áreas acadêmicas que agrupam cursos relacionados.
+
+Histórico Escolar: registro detalhado da vida acadêmica dos alunos, incluindo disciplinas cursadas, médias obtidas e situação (aprovado ou reprovado).
+
+TCCs: trabalhos de conclusão de curso atribuídos aos alunos e orientados pelos professores.
+
+As funcionalidades principais do banco de dados incluem cadastro automatizado, criação de relações entre entidades, histórico escolar detalhado e consultas avançadas para análise e gestão acadêmica.
 
 ## 🚀 Como Executar o Projeto
 
