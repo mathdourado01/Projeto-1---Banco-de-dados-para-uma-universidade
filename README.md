@@ -1,11 +1,11 @@
 # Banco de dados para uma universidade
-## 📌 Integrantes
+## Integrantes
 
 Nome: João Pedro Sabino Garcia - RA: 22.224.032-7
 
 Nome: Matheus Dourado Valle - RA: 22.224.023-6 
 
-## 📖 Descrição do Projeto
+## Descrição do Projeto
 Este projeto visa implementar um sistema de gerenciamento acadêmico universitário através de um banco de dados estruturado. Ele permite armazenar, gerenciar e consultar informações relacionadas a:
 
 Alunos: informações pessoais, matrícula, curso matriculado e TCC relacionado.
@@ -24,7 +24,7 @@ TCCs: trabalhos de conclusão de curso atribuídos aos alunos e orientados pelos
 
 As funcionalidades principais do banco de dados incluem cadastro automatizado, criação de relações entre entidades, histórico escolar detalhado e consultas avançadas para análise e gestão acadêmica.
 
-## 🚀 Como Executar o Projeto
+## Como Executar o Projeto
 
 Para rodar o projeto e gerar os dados no seu banco de dados do Supabase, siga os passos detalhados abaixo:
 - Certifique-se de ter o Python instalado em sua máquina, e utilize alguma plataforma para rodar o código (Visual Studio Code, Replit, etc.).
