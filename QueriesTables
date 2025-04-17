@@ -37,6 +37,13 @@ CREATE TABLE aluno (
     FOREIGN KEY (id_tcc) REFERENCES tccs(id_tcc),
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
 );
+CREATE TABLE disciplinas (
+    id_disciplina INT PRIMARY KEY,
+    nome_disciplina VARCHAR,
+    media_disciplina NUMERIC,
+    semestre_disciplina VARCHAR,
+    sigla_disciplina VARCHAR
+);
 CREATE TABLE departamento_professor (
     id_professor INT,
     id_departamento INT,
@@ -85,18 +92,10 @@ CREATE TABLE disciplina_historicoescolar (
     FOREIGN KEY (id_historicoescolar) REFERENCES historico_escolar(id_historicoescolar),
     FOREIGN KEY (id_disciplina) REFERENCES disciplinas(id_disciplina)
 );
-CREATE TABLE disciplinas (
-    id_disciplina INT PRIMARY KEY,
-    nome_disciplina VARCHAR,
-    media_disciplina NUMERIC,
-    semestre_disciplina VARCHAR,
-    sigla_disciplina VARCHAR
-);
+
 CREATE TABLE disciplinas_lecionadasprofessor (
     id_disciplinalecionadas INT PRIMARY KEY,
     nome_disciplinalecionadas VARCHAR,
-    media_disciplinalecionadas NUMERIC,
-    situacao_disciplinalecionadas VARCHAR,
     id_disciplina INT,
     FOREIGN KEY (id_disciplina) REFERENCES disciplinas(id_disciplina)
 );
